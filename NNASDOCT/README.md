@@ -1,31 +1,82 @@
-# NNASDOCT: proposed Dual-input Burst NN of TensorFlow/Keras 2.6 implementation.
+# NNASDOCT: Dual-input Burst NN
+
+TensorFlow/Keras 2.6 implementation of the proposed dual-input burst neural network
+for amplitude-spectrum dynamic optical coherence tomography (AS-DOCT). The model
+uses a 16-frame multi-burst OCT sequence and its pseudo-amplitude spectrum to
+generate low-, middle-, and high-frequency AS-DOCT images.
 
 ## Files
 
-- `NNmodel.py`: the Dual-input Burst architectur.
-- `NNtrain.py`: preprocessing and training, with user settings at the top.
-- `early_stop_tool.py`: the early-stopping class used by training.
+- `NNmodel.py`: the network architecture, constructed using `LSTM_3dUnet()`.
+- `NNtrain.py`: data preprocessing and training, with user settings at the top.
+- `early_stop_tool.py`: the early-stopping utility used during training.
+- `requirements.txt`: Python dependencies.
+- `ExampleDataset/`: the small example dataset described below.
 
+## Example dataset
+
+The example dataset contains **40 training patches and 10 validation patches**
+extracted from the original training and validation datasets, respectively.
+OCT inputs and their AS-DOCT targets are paired in the same sample order.
+
+| File | Shape | Values |
+| --- | --- | --- |
+| `train_oct.npy` | `(40, 16, 64, 64)` | Linear OCT intensity |
+| `train_as.npy` | `(40, 3, 64, 64)` | Linear AS-DOCT amplitude |
+| `val_oct.npy` | `(10, 16, 64, 64)` | Linear OCT intensity |
+| `val_as.npy` | `(10, 3, 64, 64)` | Linear AS-DOCT amplitude |
+
+For OCT arrays, the axes are patch, frame, depth, and fast-scan position.
+For AS-DOCT arrays, the axes are patch, frequency band, depth, and fast-scan
+position. The three frequency bands are ordered **low, middle, high**.
+
+This subset is provided to demonstrate the training workflow. It is not the full
+dataset used to obtain the results reported in the paper.
 
 ## Run
 
-1. Use a Python 3.7–3.9 environment with TensorFlow/Keras 2.6.
-2. Install dependencies: `python -m pip install -r requirements.txt`.
-3. Set `DATA_DIR`, the four data filenames, and `root_` at the top of the training script.
-4. Run: `python NNtrain.py`.
+Use a Python 3.7–3.9 environment with TensorFlow/Keras 2.6. Run the following
+commands from the `NNASDOCT` directory.
 
-Defaults are relative to the script: inputs in `data/`, results in `output/`.
-The small experimental demonstration dataset has not been added yet.
+1. Install the dependencies:
 
-OCT arrays contain linear **intensity**, shape `(N, 16, H, W)`.
-AS targets contain linear **amplitude**, shape `(N, 3, H, W)`, ordered low/middle/high.
-The original training uses 64 x 64 patches. The script itself applies square root
-to OCT intensity and log10 to AS targets; do not pre-apply those transforms.
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
 
-The architecture, nested FFT loops, loss, gradient calculation, per-epoch Adam
-reinitialization, early stopping, and checkpoint logic are preserved.
-Network outputs are log10 AS amplitudes, ordered low/middle/high.
+2. To use the provided dataset, set the input directory in `NNtrain.py` to:
 
+   ```python
+   DATA_DIR = BASE_DIR / "ExampleDataset"
+   ```
 
-Early stopping is adapted from Bjarten/early-stopping-pytorch; see the source
-attribution in `early_stop_tool.py` 
+   The four default input filenames already match the example dataset. The output
+   directory (`root_`) and training parameters can also be changed at the top of
+   the script. For a brief software demonstration, `MAX_EPOCHS` can be set to `1`.
+
+3. Start training:
+
+   ```bash
+   python NNtrain.py
+   ```
+
+The script applies a square root to OCT intensity, computes the full 16-point FFT
+magnitude for the second input, and applies `log10` to AS-DOCT targets. Input files
+should contain linear values, without these transformations applied beforehand.
+
+## Outputs
+
+By default, training results are saved in `output/` beside `NNtrain.py`:
+
+- `model.h5`: the model with the lowest validation loss.
+- `epoch_*/model.h5`: the model saved at each epoch.
+- `loss/`: total and per-band loss histories, training time, and the learning curve.
+
+Network predictions are **log10 AS-DOCT amplitudes** in low/middle/high order.
+The three model outputs correspond to frequency bands, rather than RGB display
+channels.
+
+## Acknowledgment
+
+The early-stopping utility is adapted from
+[Bjarten/early-stopping-pytorch](https://github.com/Bjarten/early-stopping-pytorch).
