@@ -1,4 +1,4 @@
-# Neural-Network-based Dynamic-optical-coherence-tomography  library by computational optics group (COG NN-DOCT library) 
+# Neural-network-based Dynamic-optical-coherence-tomography  library by computational optics group (COG NN-DOCT library) 
 The COG NN-DOCT library is a Python library which provides the open-source codes for generating dynamic optical coherence tomography (DOCT) contrasts from a a small number of OCT frames.
 
 ## NNASDOCT: Dual-input Burst NN
