@@ -8,6 +8,8 @@ for amplitude-spectrum dynamic optical coherence tomography (AS-DOCT). The model
 uses a 16-frame multi-burst OCT sequence and its pseudo-amplitude spectrum to
 generate low-, middle-, and high-frequency AS-DOCT images.
 
+The detailed methods of NN-AS-DOCT can be found in [Liu et al., arXiv:2608.09171v1](https://arxiv.org/abs/2608.09171)).
+
 Files
 -----
 
